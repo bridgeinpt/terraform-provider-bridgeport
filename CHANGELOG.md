@@ -21,11 +21,15 @@ release line (independent of BridgePort platform releases).
 - Managed resources `bridgeport_config_fragment` and `bridgeport_config_file` —
   manage reusable config fragments and text config files (which can include
   fragments via `fragment_ids`), with natural-key import (`environment/name`).
+- Managed resources `bridgeport_registry_connection` (write-only `token_wo` /
+  `password_wo` credentials) and `bridgeport_container_image`, with natural-key
+  import.
 
 ### Changed
 
-- Bump the BridgePort Go SDK to `client/v0.2.0`, which adds the write methods the
-  managed resources need.
+- Bump the BridgePort Go SDK to `client/v0.3.0`, which adds the resource write
+  methods plus complete read-back (detail getters, full registry fields), letting
+  the resources read by ID/natural key without list-based workarounds.
 - Acceptance CI now uses Terraform 1.15.7 (write-only arguments need 1.11+).
 
 ## [0.1.0] - 2026-06-25
