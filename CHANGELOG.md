@@ -24,6 +24,10 @@ release line (independent of BridgePort platform releases).
 - Managed resources `bridgeport_registry_connection` (write-only `token_wo` /
   `password_wo` credentials) and `bridgeport_container_image`, with natural-key
   import.
+- Managed resources `bridgeport_service` (environment-scoped service template,
+  with `base_env`) and `bridgeport_service_deployment` (places a service onto a
+  server, with `env_overrides`). Completes the managed-resource set for
+  [bridgeinpt/bridgeport#197](https://github.com/bridgeinpt/bridgeport/issues/197).
 
 ### Changed
 
