@@ -6,9 +6,10 @@ run:
   timeout: 5m
 
 linters:
+  # `default: standard` (errcheck, govet, ineffassign, staticcheck, unused) is
+  # implied; the list below is added on top.
   enable:
     - misspell
-    - revive
     - unconvert
     - unparam
     - whitespace
