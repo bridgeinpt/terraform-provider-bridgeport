@@ -18,7 +18,7 @@
 ---
 
 > [!WARNING]
-> **Pre-1.0 and under active development.** The provider currently ships **data sources** only. Managed (CRUD) resources are on the [roadmap](#roadmap) and the schema may change before `v1.0.0`. Pin a version and read the [CHANGELOG](CHANGELOG.md) before upgrading.
+> **Pre-1.0 and under active development.** Data sources are stable; managed (CRUD) resources are now landing in [dependency order](#roadmap) (starting with `bridgeport_server`). The schema may change before `v1.0.0` — pin a version and read the [CHANGELOG](CHANGELOG.md) before upgrading.
 
 ## Why
 
@@ -78,13 +78,19 @@ Generate a token in BridgePort under **Service Accounts** (recommended for autom
 | `bridgeport_service` | Look up a single service by `environment` + `server` + `name` |
 | `bridgeport_services` | List services, optionally narrowed by `environment` / `server` |
 
+### Available resources
+
+| Resource | Purpose |
+|---|---|
+| `bridgeport_server` | Manage a server within an environment (natural key `environment` + `name`) |
+
 Full reference: the [`docs/`](docs/) directory (rendered on the [Terraform Registry](https://registry.terraform.io/providers/bridgeinpt/bridgeport/latest/docs)).
 
 ## Roadmap
 
 Resources land in dependency order, tracked in the [platform epic #197](https://github.com/bridgeinpt/bridgeport/issues/197):
 
-1. `bridgeport_server`
+1. `bridgeport_server` ✅
 2. `bridgeport_var` / `bridgeport_secret` (write-only values)
 3. `bridgeport_config_file` / `bridgeport_config_fragment` (+ attachments)
 4. `bridgeport_registry_connection` / `bridgeport_container_image`

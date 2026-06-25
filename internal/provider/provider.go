@@ -142,12 +142,13 @@ func (p *bridgeportProvider) Configure(ctx context.Context, req provider.Configu
 	resp.ResourceData = client
 }
 
-// Resources returns the managed resources. CRUD resources are tracked as
-// follow-up work in the provider roadmap (see README) and the platform epic
-// bridgeinpt/bridgeport#197; the Go SDK is read-only today, so the initial
-// release ships data sources only.
+// Resources returns the managed (CRUD) resources. They land in dependency order
+// (see the README roadmap and platform epic bridgeinpt/bridgeport#197) as the
+// Go SDK gains the corresponding write methods.
 func (p *bridgeportProvider) Resources(_ context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{
+		NewServerResource,
+	}
 }
 
 func (p *bridgeportProvider) DataSources(_ context.Context) []func() datasource.DataSource {
