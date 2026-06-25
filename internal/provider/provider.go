@@ -148,6 +148,7 @@ func (p *bridgeportProvider) Configure(ctx context.Context, req provider.Configu
 func (p *bridgeportProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewServerResource,
+		NewVarResource,
 	}
 }
 
