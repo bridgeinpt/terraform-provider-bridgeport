@@ -7,14 +7,26 @@ release line (independent of BridgePort platform releases).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-06-25
+
+First tagged release, published to the [Terraform Registry](https://registry.terraform.io/providers/bridgeinpt/bridgeport/latest)
+as `bridgeinpt/bridgeport`. Read-only: data sources only (managed resources are
+on the roadmap, gated on the BridgePort Go SDK gaining write methods).
+
 ### Added
 
 - Initial provider scaffold (terraform-plugin-framework, protocol v6).
 - Provider configuration: `endpoint` and `token` (with `BRIDGEPORT_ENDPOINT` /
   `BRIDGEPORT_TOKEN` environment-variable fallbacks); `Configure` validates the
   token against the live instance.
-- Data source `bridgeport_environment` — look up a single environment by name.
-- Data source `bridgeport_environments` — list all environments.
+- Data sources `bridgeport_environment` / `bridgeport_environments` — look up a
+  single environment by name, or list all environments.
+- Data sources `bridgeport_server` / `bridgeport_servers` — look up a server by
+  its natural key (`environment` + `name`), or list servers (optionally filtered
+  by environment).
+- Data sources `bridgeport_service` / `bridgeport_services` — look up a service
+  by its natural key (`environment` + `server` + `name`), or list services
+  (optionally narrowed by environment / server).
 - Acceptance-test harness (`scripts/acc-harness.sh`) that runs the `TF_ACC`
   suite against a disposable BridgePort image.
 - GoReleaser + GPG-signed release pipeline for the Terraform/OpenTofu registries.
@@ -25,3 +37,7 @@ release line (independent of BridgePort platform releases).
   `config_file`/`fragment` → `registry_connection`/`container_image` →
   `service`/`service_deployment`), tracked in
   [bridgeinpt/bridgeport#197](https://github.com/bridgeinpt/bridgeport/issues/197).
+  Gated on the BridgePort Go SDK (`client/`) gaining write methods.
+
+[Unreleased]: https://github.com/bridgeinpt/terraform-provider-bridgeport/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/bridgeinpt/terraform-provider-bridgeport/releases/tag/v0.1.0

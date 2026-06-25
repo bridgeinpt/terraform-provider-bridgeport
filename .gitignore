@@ -22,6 +22,12 @@ crash.*.log
 .terraformrc
 terraform.rc
 
+# GPG key material — never commit signing keys (public or private). The release
+# pipeline reads the private key from the GPG_PRIVATE_KEY repo secret, and the
+# public key lives on the registry, not in the repo.
+*.asc
+*.gpg
+
 # Editor / OS noise
 .idea/
 .vscode/
