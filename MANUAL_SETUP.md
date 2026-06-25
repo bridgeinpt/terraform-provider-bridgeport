@@ -61,44 +61,42 @@ Going forward, run `make generate` if you change a schema or example to refresh 
 
 ---
 
-## 3. Before the first release (`vX.Y.Z` tag)  — *needs secret material + org admin*
+## 3. ✅ First release prerequisites — *done*
 
-`release.yml` runs GoReleaser to build GPG-signed assets in the layout the registries ingest. It needs:
+`release.yml` runs GoReleaser to build GPG-signed assets in the layout the registries ingest. All three prerequisites are in place (verified by the signed `v0.1.0` release); the commands are kept below for key rotation / re-bootstrapping.
 
-### 3a. A GPG signing key
-Generate (or reuse an org) signing key and export the **private** key + note the passphrase:
+### 3a. ✅ GPG signing key — *done*
+A GPG signing key (key ID `03DF9BCABE6A2FAC`) was generated; its public key is registered with the Terraform Registry (step 4). To rotate/regenerate:
 ```bash
 gpg --full-generate-key                       # RSA 4096, no expiry or a long one
 gpg --armor --export-secret-keys <KEY_ID> > private.asc
 gpg --armor --export <KEY_ID> > public.asc     # used in step 4
 ```
+(`*.asc` / `*.gpg` are git-ignored, so exported key files never land in the repo.)
 
-### 3b. Repo secrets  — *can be run with the bootstrap token*
+### 3b. ✅ Repo secrets — *done*
+`GPG_PRIVATE_KEY` and `PASSPHRASE` are set on the repo. To reapply (e.g. after rotation):
 ```bash
 gh secret set GPG_PRIVATE_KEY < private.asc --repo bridgeinpt/terraform-provider-bridgeport
 gh secret set PASSPHRASE       --repo bridgeinpt/terraform-provider-bridgeport   # paste the passphrase
 rm -f private.asc              # don't leave the private key on disk
 ```
 
-### 3c. Allowlist the release workflow's third-party actions  — *needs org admin*
-`test.yml` is fine, but `release.yml` uses two non-GitHub actions. Add them under
-Org → Settings → Actions → General → "Allow select actions" (or repo-level if the org delegates):
-- `goreleaser/goreleaser-action@*`
-- `crazy-max/ghaction-import-gpg@*`
-- (also `actions/checkout`, `actions/setup-go` — usually already covered by "Allow actions created by GitHub").
-
-If you'd rather not allowlist them, the alternative is to install GoReleaser + import the key via plain run-steps; ask and I'll rewrite `release.yml` that way.
+### 3c. ✅ Allowlist the release workflow's third-party actions — *done*
+`goreleaser/goreleaser-action@*` and `crazy-max/ghaction-import-gpg@*` are allowlisted in the org Actions policy (Org → Settings → Actions → General → "Allow select actions"). `actions/checkout` and `actions/setup-go` are covered by "Allow actions created by GitHub".
 
 ---
 
-## 4. Registry publication  — *manual web flows, after the first signed release*
+## 4. Registry publication
 
-A public repo does **not** auto-publish. After step 3 produces a signed `vX.Y.Z` release:
+A public repo does **not** auto-publish; this is done per registry once a signed release exists.
 
-- **Terraform Registry**: sign in at <https://registry.terraform.io> with GitHub → Publish → Providers → select `terraform-provider-bridgeport` → upload the **GPG public key** (`public.asc`). The registry then ingests existing and future releases.
-- **OpenTofu Registry**: submit the provider + GPG key via the process in <https://github.com/opentofu/registry> (a PR to their registry repo).
+- **Terraform Registry**: ✅ *done* — the `bridgeinpt` public namespace is claimed, the provider `bridgeinpt/bridgeport` is published, and the GPG public key is uploaded. **v0.1.0 is live** and verified end-to-end (`terraform init` installs it and validates the signature): <https://registry.terraform.io/providers/bridgeinpt/bridgeport/latest>
+- **OpenTofu Registry**: ⬜ *pending* — submit the provider + GPG key via a PR to <https://github.com/opentofu/registry>.
 
-The `Address` in `main.go` (`registry.terraform.io/bridgeinpt/bridgeport`) and the `source = "bridgeinpt/bridgeport"` in the docs/examples already assume the `bridgeinpt` namespace — make sure your registry account owns it.
+The `Address` in `main.go` (`registry.terraform.io/bridgeinpt/bridgeport`) and the `source = "bridgeinpt/bridgeport"` in the docs/examples assume the `bridgeinpt` namespace. On the public registry the namespace **is** the GitHub account/org that owns the repo — it can't be chosen arbitrarily, so `bridgeinpt` is correct here.
+
+> **Note on the HCP Terraform organization:** publishing now goes through an HCP Terraform org (app.terraform.io). That org's name is arbitrary and unrelated to the public namespace — the namespace `bridgeinpt` is claimed by linking the `bridgeinpt` **GitHub** account to the org.
 
 ---
 
