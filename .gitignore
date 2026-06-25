@@ -1,0 +1,33 @@
+# Compiled provider binary
+terraform-provider-bridgeport
+terraform-provider-bridgeport.exe
+
+# GoReleaser output
+dist/
+
+# Go workspace / vendor
+/vendor/
+go.work
+go.work.sum
+
+# Terraform working files (from manual testing / examples)
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Local dev-override for testing an unreleased build
+.terraformrc
+terraform.rc
+
+# Editor / OS noise
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Acceptance-test harness scratch
+.acc/
+acc-token.txt

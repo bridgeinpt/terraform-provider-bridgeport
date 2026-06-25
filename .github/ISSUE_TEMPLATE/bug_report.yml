@@ -1,0 +1,69 @@
+name: Bug report
+description: Something in the Terraform provider isn't working as documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting an issue. Reproduction steps and versions are what make bugs fixable.
+        **For security issues, do NOT open a public issue** — use a [Security Advisory](https://github.com/bridgeinpt/terraform-provider-bridgeport/security/advisories/new) instead.
+
+        If the problem is in the BridgePort server or its HTTP API (not the provider), please open it on the [platform repo](https://github.com/bridgeinpt/bridgeport/issues).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Terraform configuration
+      description: A minimal `.tf` snippet that reproduces the issue. Redact endpoints/tokens.
+      render: hcl
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. `terraform plan` with the config above
+        2. Observe ...
+    validations:
+      required: true
+
+  - type: input
+    id: provider_version
+    attributes:
+      label: Provider version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: terraform_version
+    attributes:
+      label: Terraform / OpenTofu version
+      placeholder: "Terraform v1.9.8"
+    validations:
+      required: true
+
+  - type: input
+    id: bridgeport_version
+    attributes:
+      label: BridgePort version
+      description: From the About page or `/health` (e.g. `20260225-abc1234`).
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Output with `TF_LOG=DEBUG` if possible. Redact any secrets first.
+      render: shell

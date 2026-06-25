@@ -1,0 +1,86 @@
+name: test
+
+# Build, vet, lint, unit-test, and run the acceptance suite against a
+# disposable BridgePort image on every PR and on pushes to master.
+#
+# NOTE: this workflow deliberately uses only GitHub-owned actions
+# (actions/checkout, actions/setup-go) plus plain run-steps, so it works under
+# a restrictive org "allowed actions" policy without extra allowlisting.
+# Third-party tools (golangci-lint, terraform) are installed via run-steps.
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'examples/**'
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'examples/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build & vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      # go.sum is generated here (see go.mod note); once committed, switch to
+      # `go mod download` and add a `go mod tidy -diff` check.
+      - run: go mod tidy
+      - run: gofmt -l -s . | tee /tmp/fmt.out && test ! -s /tmp/fmt.out
+      - run: go build -v ./...
+      - run: go vet ./...
+      - run: go test -v -cover -timeout=120s ./...
+
+  lint:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go mod tidy
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
+            | sh -s -- -b "$(go env GOPATH)/bin" v2.1.6
+      - run: "$(go env GOPATH)/bin/golangci-lint run --timeout 5m"
+
+  acceptance:
+    name: acceptance (TF_ACC) against built image
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      # Pull the public edge image the platform repo publishes on every master
+      # push. Override to test a PR-built image (see the manual checklist for
+      # wiring this into the platform repo's provider-compat job, issue #202).
+      BRIDGEPORT_IMAGE: ghcr.io/bridgeinpt/bridgeport:edge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go mod tidy
+      - name: Install Terraform CLI
+        run: |
+          TF_VERSION=1.9.8
+          curl -sSfL -o /tmp/tf.zip \
+            "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+          sudo unzip -o /tmp/tf.zip -d /usr/local/bin
+          terraform version
+      - name: Run acceptance suite
+        run: ./scripts/acc-harness.sh test

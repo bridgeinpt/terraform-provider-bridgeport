@@ -1,0 +1,28 @@
+name: Feature request
+description: Suggest a new resource, data source, or provider capability
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! For new **resources**, note that the provider manages *configuration only* — runtime operations (deploys, restarts, rollbacks) stay imperative by design. See the roadmap in the README.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What are you trying to manage declaratively, and what's missing today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed resource / data source
+      description: Sketch the HCL you'd like to write, and which BridgePort API surface it maps to.
+      render: hcl
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

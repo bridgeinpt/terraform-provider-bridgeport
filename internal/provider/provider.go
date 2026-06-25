@@ -1,0 +1,158 @@
+// Copyright (c) BRIDGE IN.
+// SPDX-License-Identifier: Apache-2.0
+
+package provider
+
+import (
+	"context"
+	"os"
+
+	bpclient "github.com/bridgeinpt/bridgeport/client"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+// Ensure bridgeportProvider satisfies the provider.Provider interface.
+var _ provider.Provider = &bridgeportProvider{}
+
+// bridgeportProvider is the provider implementation.
+type bridgeportProvider struct {
+	// version is set to the released provider version (or "dev"/"test") and is
+	// surfaced to Terraform for diagnostics and user-agent reporting.
+	version string
+}
+
+// bridgeportProviderModel maps the provider-block configuration to Go values.
+type bridgeportProviderModel struct {
+	Endpoint types.String `tfsdk:"endpoint"`
+	Token    types.String `tfsdk:"token"`
+}
+
+// New returns a function that constructs the provider, as expected by
+// providerserver.Serve. version is injected at build time.
+func New(version string) func() provider.Provider {
+	return func() provider.Provider {
+		return &bridgeportProvider{version: version}
+	}
+}
+
+func (p *bridgeportProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "bridgeport"
+	resp.Version = p.version
+}
+
+func (p *bridgeportProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		MarkdownDescription: "The BridgePort provider manages configuration on a [BridgePort](https://github.com/bridgeinpt/bridgeport) " +
+			"instance — environments, servers, and the resources layered on top of them — declaratively via its HTTP API. " +
+			"Runtime operations (deploys, restarts, rollbacks) remain imperative; the provider only manages desired configuration.",
+		Attributes: map[string]schema.Attribute{
+			"endpoint": schema.StringAttribute{
+				Optional: true,
+				MarkdownDescription: "Base URL of the BridgePort instance, e.g. `https://bridgeport.example.com` (no trailing slash). " +
+					"May also be set with the `BRIDGEPORT_ENDPOINT` environment variable.",
+			},
+			"token": schema.StringAttribute{
+				Optional:  true,
+				Sensitive: true,
+				MarkdownDescription: "API bearer token used to authenticate. A scoped **service-account** token is recommended for automation " +
+					"(see the BridgePort docs on Service Accounts). May also be set with the `BRIDGEPORT_TOKEN` environment variable. " +
+					"Prefer the environment variable so the token never lands in Terraform state or configuration.",
+			},
+		},
+	}
+}
+
+func (p *bridgeportProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var config bridgeportProviderModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Values must be known at configure time — a value derived from another
+	// resource isn't available yet and can't be used to build the client.
+	if config.Endpoint.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("endpoint"),
+			"Unknown BridgePort endpoint",
+			"The provider cannot create the API client because the endpoint is unknown at configure time. "+
+				"Set it to a static value or use the BRIDGEPORT_ENDPOINT environment variable.",
+		)
+	}
+	if config.Token.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("token"),
+			"Unknown BridgePort token",
+			"The provider cannot create the API client because the token is unknown at configure time. "+
+				"Set it to a static value or use the BRIDGEPORT_TOKEN environment variable.",
+		)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Configuration takes precedence over environment variables.
+	endpoint := os.Getenv("BRIDGEPORT_ENDPOINT")
+	token := os.Getenv("BRIDGEPORT_TOKEN")
+	if !config.Endpoint.IsNull() {
+		endpoint = config.Endpoint.ValueString()
+	}
+	if !config.Token.IsNull() {
+		token = config.Token.ValueString()
+	}
+
+	if endpoint == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("endpoint"),
+			"Missing BridgePort endpoint",
+			"Set the `endpoint` argument or the BRIDGEPORT_ENDPOINT environment variable.",
+		)
+	}
+	if token == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("token"),
+			"Missing BridgePort token",
+			"Set the `token` argument or the BRIDGEPORT_TOKEN environment variable.",
+		)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	client := bpclient.NewClient(endpoint, token)
+
+	// Fail fast with a clear diagnostic if the credentials are wrong, rather
+	// than surfacing an opaque 401 on the first data-source read.
+	if _, err := client.GetCurrentUser(); err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to authenticate with BridgePort",
+			"The provider could not validate the configured token against "+endpoint+". "+
+				"Verify the endpoint is reachable and the token is valid.\n\nError: "+err.Error(),
+		)
+		return
+	}
+
+	// The client is shared with every data source and resource.
+	resp.DataSourceData = client
+	resp.ResourceData = client
+}
+
+// Resources returns the managed resources. CRUD resources are tracked as
+// follow-up work in the provider roadmap (see README) and the platform epic
+// bridgeinpt/bridgeport#197; the Go SDK is read-only today, so the initial
+// release ships data sources only.
+func (p *bridgeportProvider) Resources(_ context.Context) []func() resource.Resource {
+	return nil
+}
+
+func (p *bridgeportProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{
+		NewEnvironmentDataSource,
+		NewEnvironmentsDataSource,
+	}
+}

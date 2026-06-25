@@ -1,0 +1,27 @@
+# CODEOWNERS for terraform-provider-bridgeport
+#
+# Lines are evaluated top-to-bottom; the LAST matching line wins for a given
+# path. For reviews to be required, branch protection on `master` must also
+# have "Require review from Code Owners" enabled, and the team must have Write
+# access on the repo.
+
+# Default: every PR gets an engineering review.
+*                                       @bridgeinpt/engineering
+
+# --- Self-protection ---------------------------------------------------------
+/.github/CODEOWNERS                     @bridgeinpt/engineering
+
+# --- CI, build, and supply-chain surface -------------------------------------
+# Workflow changes can swap runners, add actions, or alter the signed-release
+# pipeline — high-value abuse vectors.
+/.github/workflows/                     @bridgeinpt/engineering
+/.github/dependabot.yml                 @bridgeinpt/engineering
+/.goreleaser.yml                        @bridgeinpt/engineering
+
+# --- Dependencies (supply chain) ---------------------------------------------
+/go.mod                                 @bridgeinpt/engineering
+/go.sum                                 @bridgeinpt/engineering
+
+# --- Legal and security policy -----------------------------------------------
+/LICENSE                                @bridgeinpt/engineering
+/SECURITY.md                            @bridgeinpt/engineering

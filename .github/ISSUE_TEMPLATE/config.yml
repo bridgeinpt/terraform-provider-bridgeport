@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/bridgeinpt/terraform-provider-bridgeport/security/advisories/new
+    about: Please report security issues privately via a GitHub Security Advisory.
+  - name: Question or general discussion
+    url: https://github.com/bridgeinpt/bridgeport/discussions
+    about: For usage questions and design discussions, use the main BridgePort Discussions.
+  - name: BridgePort platform / API issue
+    url: https://github.com/bridgeinpt/bridgeport/issues
+    about: If the bug is in the BridgePort server or its HTTP API (not the provider), open it on the platform repo.

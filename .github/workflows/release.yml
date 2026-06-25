@@ -1,0 +1,48 @@
+name: release
+
+# Triggered by pushing a semver tag `vX.Y.Z`. GoReleaser cross-compiles the
+# provider, builds the registry zips + SHA256SUMS, GPG-signs the checksums, and
+# attaches everything to the GitHub Release — the exact artifact layout the
+# Terraform / OpenTofu registries ingest.
+#
+# REQUIRED before the first release (see the repo's manual-setup checklist):
+#   - Repo secrets GPG_PRIVATE_KEY and PASSPHRASE (the signing key).
+#   - The two third-party actions below allowlisted in org/repo "allowed
+#     actions" policy: goreleaser/goreleaser-action and
+#     crazy-max/ghaction-import-gpg.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # create the GitHub Release + upload assets
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          args: release --clean
+        env:
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
