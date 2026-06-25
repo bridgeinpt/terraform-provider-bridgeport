@@ -7,6 +7,18 @@ release line (independent of BridgePort platform releases).
 
 ## [Unreleased]
 
+### Added
+
+- Managed resource `bridgeport_server` — create, update, and delete servers in
+  an environment, with natural-key import (`terraform import … environment/name`).
+  First of the managed (CRUD) resources tracked in
+  [bridgeinpt/bridgeport#197](https://github.com/bridgeinpt/bridgeport/issues/197).
+
+### Changed
+
+- Bump the BridgePort Go SDK to `client/v0.2.0`, which adds the write methods the
+  managed resources need.
+
 ## [0.1.0] - 2026-06-25
 
 First tagged release, published to the [Terraform Registry](https://registry.terraform.io/providers/bridgeinpt/bridgeport/latest)
