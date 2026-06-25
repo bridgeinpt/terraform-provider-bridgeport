@@ -1,0 +1,61 @@
+---
+page_title: "bridgeport_secret Resource - terraform-provider-bridgeport"
+description: |-
+  Manages a secret in an environment. The secret value is a write-only argument (value_wo) — it is sent to BridgePort but never stored in Terraform state. To rotate the value, change value_wo and bump value_wo_version.
+---
+
+# bridgeport_secret (Resource)
+
+Manages a secret in an environment. The secret value is a **write-only** argument (`value_wo`) — it is sent to BridgePort but never stored in Terraform state. To rotate the value, change `value_wo` and bump `value_wo_version`.
+
+~> **Terraform 1.11+ required.** `value_wo` is a [write-only argument](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only); it requires Terraform 1.11 or later.
+
+## Example Usage
+
+```terraform
+# Manage a secret. The value is write-only — it never lands in Terraform state.
+# Source it from a write-only-capable source (e.g. an ephemeral value or a
+# variable) and bump value_wo_version whenever you change value_wo to rotate it.
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+
+resource "bridgeport_secret" "db_password" {
+  environment      = "production"
+  key              = "DB_PASSWORD"
+  value_wo         = var.db_password
+  value_wo_version = "1"
+  description      = "Primary database password"
+}
+```
+
+## Schema
+
+### Required
+
+- `environment` (String) The name of the environment the secret belongs to. Changing this forces a new resource.
+- `key` (String) The secret key (its natural key). Must match `^[A-Z][A-Z0-9_]*$`. Changing this forces a new resource.
+- `value_wo` (String, Write-only, Sensitive) The secret value. Write-only: it is sent to the API but never persisted in state. Requires Terraform 1.11+.
+- `value_wo_version` (String) An arbitrary version string for the secret value. Change it together with `value_wo` to rotate the secret.
+
+### Optional
+
+- `description` (String) Human-friendly description of the secret.
+- `never_reveal` (Boolean) If true, the secret value can never be revealed through the UI/API after creation.
+
+### Read-Only
+
+- `id` (String) Opaque server-assigned identifier for the secret.
+- `created_at` (String) RFC 3339 timestamp of when the secret was created.
+- `updated_at` (String) RFC 3339 timestamp of when the secret was last updated.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Secrets are imported by their natural key: "environment/key". The value cannot
+# be recovered, so after importing add value_wo and value_wo_version to config.
+terraform import bridgeport_secret.db_password production/DB_PASSWORD
+```

@@ -139,7 +139,8 @@ jobs:
       - run: go mod download
       - name: Install Terraform CLI
         run: |
-          TF_VERSION=1.9.8
+          # 1.11+ is required for write-only arguments (e.g. bridgeport_secret).
+          TF_VERSION=1.15.7
           curl -sSfL -o /tmp/tf.zip \
             "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
           sudo unzip -o /tmp/tf.zip -d /usr/local/bin
