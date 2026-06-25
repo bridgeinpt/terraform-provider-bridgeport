@@ -73,6 +73,10 @@ Generate a token in BridgePort under **Service Accounts** (recommended for autom
 |---|---|
 | `bridgeport_environment` | Look up a single environment by `name` |
 | `bridgeport_environments` | List all environments visible to the token |
+| `bridgeport_server` | Look up a single server by `environment` + `name` |
+| `bridgeport_servers` | List servers, optionally filtered by `environment` |
+| `bridgeport_service` | Look up a single service by `environment` + `server` + `name` |
+| `bridgeport_services` | List services, optionally narrowed by `environment` / `server` |
 
 Full reference: the [`docs/`](docs/) directory (rendered on the [Terraform Registry](https://registry.terraform.io/providers/bridgeinpt/bridgeport/latest/docs)).
 
