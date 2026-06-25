@@ -97,8 +97,8 @@ The provider talks to BridgePort's HTTP API, whose wire format is governed by th
 Requires Go (see `go.mod`), Terraform/OpenTofu, and Docker (for acceptance tests).
 
 ```bash
-make bootstrap   # ONE-TIME: go mod tidy — resolves deps + the BridgePort Go SDK, writes go.sum
-make build       # compile
+make build       # compile (go.mod + go.sum are committed — builds out of the box)
+make bootstrap   # go mod tidy — run after bumping the SDK or a dependency
 make test        # unit tests
 make lint        # golangci-lint
 make generate    # regenerate docs/ from schema + examples/ (tfplugindocs)

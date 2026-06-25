@@ -15,21 +15,17 @@ This repo was bootstrapped with everything that could be configured via the GitH
 - Topics set; description set.
 - `.github/`: Dependabot (gomod + actions), CODEOWNERS, issue templates, PR template.
 - CI `test.yml` (build/vet/lint/unit + acceptance) uses **GitHub-owned actions only**, so it runs without touching the org actions allowlist.
+- **`go.mod` + `go.sum` committed and locked** (BridgePort Go SDK `client/v0.1.0`); `go build`/`go vet`/unit tests verified locally with Go 1.25.11. CI is green.
 
 ---
 
-## 1. Before merging PRs (recommended)
+## 1. Before merging PRs
 
-### 1a. Grant the engineering team write access  — *needs org admin*
-CODEOWNERS (`@bridgeinpt/engineering`) only enforces reviews if the team has **Write** (or Maintain) access. The team exists but is **not** on this repo yet.
+### 1a. ✅ Grant the engineering team write access — *done*
+`@bridgeinpt/engineering` has been granted access, so CODEOWNERS reviews enforce.
 
-- UI: Repo → Settings → Collaborators and teams → Add teams → `engineering` → **Write**.
-- CLI (needs `admin:org` / team-maintainer token):
-  ```bash
-  gh api -X PUT orgs/bridgeinpt/teams/engineering/repos/bridgeinpt/terraform-provider-bridgeport -f permission=push
-  ```
-
-### 1b. Enable branch protection on `master`  — *can be run with the bootstrap token*
+### 1b. ✅ Enable branch protection on `master` — *done*
+Applied: block direct pushes, require PR + green CI (`build & vet`, `golangci-lint`, `acceptance …`) + code-owner review, linear history, conversation resolution. Reapply/adjust with:
 Mirrors the platform repo (block direct pushes, require PR + green CI + code-owner review). Run after CI is green so you don't lock yourself out mid-iteration:
 
 ```bash
@@ -57,18 +53,11 @@ JSON
 
 ---
 
-## 2. One-time code hygiene  — *needs a local Go toolchain*
+## 2. ✅ Code hygiene — *done*
 
-`go.sum` is intentionally **not** committed (the bootstrap environment had no Go). CI regenerates it each run via `go mod tidy`, so it's green without this — but commit it for reproducibility and so Dependabot tracks exact versions:
+`go.mod` + `go.sum` are committed and locked (BridgePort Go SDK `client/v0.1.0`); `go build`/`go vet`/unit tests pass locally and in CI. CI also enforces `go mod tidy` produces no diff.
 
-```bash
-make bootstrap                       # == go mod tidy: resolves deps + the BridgePort Go SDK pseudo-version
-git add go.mod go.sum
-git commit -s -m "chore: lock go modules"
-git push
-```
-
-While you're there, run `make generate` to confirm the committed `docs/` match the schema (the scaffold's docs are hand-written to match; tfplugindocs is the source of truth going forward).
+Going forward, run `make generate` if you change a schema or example to refresh the committed `docs/` (tfplugindocs is the source of truth; the scaffold's docs are hand-written to match).
 
 ---
 

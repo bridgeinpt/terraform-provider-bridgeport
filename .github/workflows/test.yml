@@ -35,9 +35,11 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      # go.sum is generated here (see go.mod note); once committed, switch to
-      # `go mod download` and add a `go mod tidy -diff` check.
+      - run: go mod download
+      - run: go mod verify
+      # Fail if go.mod/go.sum aren't tidy.
       - run: go mod tidy
+      - run: git diff --exit-code go.mod go.sum
       - run: gofmt -l -s . | tee /tmp/fmt.out && test ! -s /tmp/fmt.out
       - run: go build -v ./...
       - run: go vet ./...
@@ -52,7 +54,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - run: go mod tidy
+      - run: go mod download
       - name: Install golangci-lint
         # Pin a release built with Go >= the module's `go` directive; an older
         # golangci-lint refuses to lint a newer-Go module.
@@ -76,7 +78,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - run: go mod tidy
+      - run: go mod download
       - name: Install Terraform CLI
         run: |
           TF_VERSION=1.9.8

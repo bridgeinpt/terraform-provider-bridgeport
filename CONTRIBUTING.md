@@ -31,11 +31,11 @@ Thanks for your interest in contributing! This is the official Terraform/OpenTof
 git clone https://github.com/bridgeinpt/terraform-provider-bridgeport.git
 cd terraform-provider-bridgeport
 
-# ONE-TIME: resolve modules and write go.sum (not committed in the scaffold)
-make bootstrap
-git add go.mod go.sum && git commit -m "chore: lock go modules"
-
+# go.mod + go.sum are committed — builds out of the box
 make build
+
+# after bumping the SDK or a dependency, re-tidy and commit the diff
+make bootstrap
 ```
 
 To exercise an unreleased build against real `.tf`, use a Terraform [dev override](https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides):
