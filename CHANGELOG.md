@@ -13,6 +13,8 @@ release line (independent of BridgePort platform releases).
   an environment, with natural-key import (`terraform import … environment/name`).
   First of the managed (CRUD) resources tracked in
   [bridgeinpt/bridgeport#197](https://github.com/bridgeinpt/bridgeport/issues/197).
+- Managed resource `bridgeport_var` — manage non-secret environment variables,
+  with natural-key import (`environment/key`).
 
 ### Changed
 
