@@ -15,11 +15,15 @@ release line (independent of BridgePort platform releases).
   [bridgeinpt/bridgeport#197](https://github.com/bridgeinpt/bridgeport/issues/197).
 - Managed resource `bridgeport_var` — manage non-secret environment variables,
   with natural-key import (`environment/key`).
+- Managed resource `bridgeport_secret` — manage secrets with a **write-only**
+  value (`value_wo` + `value_wo_version` rotation trigger), so secret values
+  never enter Terraform state. Requires Terraform 1.11+.
 
 ### Changed
 
 - Bump the BridgePort Go SDK to `client/v0.2.0`, which adds the write methods the
   managed resources need.
+- Acceptance CI now uses Terraform 1.15.7 (write-only arguments need 1.11+).
 
 ## [0.1.0] - 2026-06-25
 
