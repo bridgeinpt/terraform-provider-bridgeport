@@ -18,6 +18,9 @@ release line (independent of BridgePort platform releases).
 - Managed resource `bridgeport_secret` — manage secrets with a **write-only**
   value (`value_wo` + `value_wo_version` rotation trigger), so secret values
   never enter Terraform state. Requires Terraform 1.11+.
+- Managed resources `bridgeport_config_fragment` and `bridgeport_config_file` —
+  manage reusable config fragments and text config files (which can include
+  fragments via `fragment_ids`), with natural-key import (`environment/name`).
 
 ### Changed
 
