@@ -1,0 +1,60 @@
+---
+page_title: "bridgeport_services Data Source - terraform-provider-bridgeport"
+description: |-
+  List services visible to the configured token, optionally narrowed to an environment or a single server.
+---
+
+# bridgeport_services (Data Source)
+
+List services visible to the configured token, optionally narrowed to an environment or a single server.
+
+## Example Usage
+
+```terraform
+# List every service visible to the configured token.
+data "bridgeport_services" "all" {}
+
+# Or narrow to a single environment...
+data "bridgeport_services" "production" {
+  environment = "production"
+}
+
+# ...or to a single server within an environment.
+data "bridgeport_services" "web_1" {
+  environment = "production"
+  server      = "web-1"
+}
+
+output "production_service_names" {
+  value = [for s in data.bridgeport_services.production.services : s.name]
+}
+```
+
+## Schema
+
+### Optional
+
+- `environment` (String) If set, only return services in this environment (by `name`). Required when `server` is set, so the server can be resolved by name.
+- `server` (String) If set, only return services on this server (by `name`). Requires `environment` to also be set. Omit to list every service in the environment, or across all environments when `environment` is also omitted.
+
+### Read-Only
+
+- `services` (Attributes List) The matching services. (see [below for nested schema](#nestedatt--services))
+
+<a id="nestedatt--services"></a>
+### Nested Schema for `services`
+
+Read-Only:
+
+- `id` (String) Opaque server-assigned identifier for the service.
+- `name` (String) The unique name of the service on its server.
+- `image_tag` (String) The container image tag the service is configured to run.
+- `environment_id` (String) Opaque identifier of the environment the service belongs to.
+- `container_image_id` (String) Opaque identifier of the container image the service deploys.
+- `service_type_id` (String) Opaque identifier of the service type, or null if the service has none.
+- `server_id` (String) Opaque identifier of the server the service runs on.
+- `container_name` (String) Name of the running container (runtime, reference only).
+- `status` (String) Current runtime status of the service (reference only).
+- `container_status` (String) Current container status (runtime, reference only).
+- `health_status` (String) Current health status (runtime, reference only).
+- `created_at` (String) RFC 3339 timestamp of when the service was created.

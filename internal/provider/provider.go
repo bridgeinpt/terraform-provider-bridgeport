@@ -154,5 +154,9 @@ func (p *bridgeportProvider) DataSources(_ context.Context) []func() datasource.
 	return []func() datasource.DataSource{
 		NewEnvironmentDataSource,
 		NewEnvironmentsDataSource,
+		NewServerDataSource,
+		NewServersDataSource,
+		NewServiceDataSource,
+		NewServicesDataSource,
 	}
 }
