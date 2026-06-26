@@ -28,6 +28,12 @@ release line (independent of BridgePort platform releases).
   with `base_env`) and `bridgeport_service_deployment` (places a service onto a
   server, with `env_overrides`). Completes the managed-resource set for
   [bridgeinpt/bridgeport#197](https://github.com/bridgeinpt/bridgeport/issues/197).
+- Data source `bridgeport_version` — reports the targeted instance's status and
+  version (`version`, `bundled_agent_version`, `cli_version`) from `GET /health`,
+  for provider ↔ instance version negotiation. Completes the data-source set
+  from [bridgeinpt/terraform-provider-bridgeport#6](https://github.com/bridgeinpt/terraform-provider-bridgeport/issues/6);
+  gated on the SDK gaining a typed health getter
+  ([bridgeinpt/bridgeport#304](https://github.com/bridgeinpt/bridgeport/issues/304)).
 
 ### Changed
 

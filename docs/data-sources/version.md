@@ -1,0 +1,39 @@
+---
+page_title: "bridgeport_version Data Source - terraform-provider-bridgeport"
+description: |-
+  Reports the targeted BridgePort instance's status and version, read from its unauthenticated GET /health endpoint (the canonical version source — there is deliberately no /api/version route). Use it for provider ↔ instance version negotiation: surface the running platform version in outputs, or assert a minimum BridgePort version with a precondition before a module applies.
+---
+
+# bridgeport_version (Data Source)
+
+Reports the targeted BridgePort instance's status and version, read from its unauthenticated `GET /health` endpoint (the canonical version source — there is deliberately no `/api/version` route). Use it for **provider ↔ instance version negotiation**: surface the running platform version in outputs, or assert a minimum BridgePort version with a `precondition` before a module applies.
+
+## Example Usage
+
+```terraform
+# Read the targeted BridgePort instance's version (from GET /health) for
+# provider/version negotiation against the target instance.
+data "bridgeport_version" "this" {}
+
+output "bridgeport_version" {
+  value = data.bridgeport_version.this.version
+}
+
+# Assert a minimum platform version before this configuration applies.
+check "bridgeport_supported" {
+  assert {
+    condition     = data.bridgeport_version.this.status == "ok"
+    error_message = "BridgePort instance is not healthy (status: ${data.bridgeport_version.this.status})."
+  }
+}
+```
+
+## Schema
+
+### Read-Only
+
+- `bundled_agent_version` (String) Version of the agent bundled with this instance.
+- `cli_version` (String) Version of the CLI bundled with this instance.
+- `status` (String) Instance health status, e.g. `ok`.
+- `timestamp` (String) RFC 3339 timestamp of when the instance produced this health response (i.e. read time).
+- `version` (String) Running BridgePort application version, e.g. `1.4.2`.
