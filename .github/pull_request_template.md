@@ -13,5 +13,5 @@
 - [ ] `make lint` passes
 - [ ] Unit tests added/updated where applicable (`make test`)
 - [ ] Acceptance tests added/updated and run (`make testacc`) for new resources or data sources
-- [ ] `make generate` run and committed, if the schema or examples changed (registry docs in `docs/`)
+- [ ] `make generate` run and committed, if the schema or examples changed (registry docs in `docs/`; CI verifies they match)
 - [ ] Changes that consume new BridgePort API surface bumped the Go SDK dependency

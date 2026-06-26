@@ -34,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       code: ${{ steps.filter.outputs.code }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -59,25 +60,36 @@ jobs:
           if [ "$changed" = "__ERR__" ]; then
             echo "Could not determine changed files; running checks to be safe."
             echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "docs=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           echo "Changed files:"
           printf '%s\n' "$changed"
 
+          # `code`: build/lint/acceptance-affecting files.
+          # `docs`: anything tfplugindocs reads (schema, examples, templates) or
+          #         the committed output itself, so hand-edits to docs/ are caught.
           code=false
+          docs=false
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             case "$f" in
               *.go|go.mod|go.sum|.golangci.yml|scripts/*|.github/workflows/*)
                 code=true ;;
             esac
+            case "$f" in
+              *.go|go.mod|go.sum|examples/*|templates/*|docs/*|.github/workflows/*)
+                docs=true ;;
+            esac
           done <<EOF
           $changed
           EOF
 
           echo "meaningful code change: $code"
+          echo "docs-affecting change: $docs"
           echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "docs=$docs" >> "$GITHUB_OUTPUT"
 
   build:
     name: build & vet
@@ -147,3 +159,38 @@ jobs:
           terraform version
       - name: Run acceptance suite
         run: ./scripts/acc-harness.sh test
+
+  # Verify the committed docs/ match `make generate` output, so the
+  # "docs are generated, don't hand-edit" convention is actually enforced
+  # (tfplugindocs version is pinned in main.go's //go:generate directive).
+  docs:
+    name: docs up to date (tfplugindocs)
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6.4.0
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go mod download
+      - name: Install Terraform CLI
+        # tfplugindocs shells out to `terraform providers schema -json` to read
+        # the provider schema; the version doesn't affect the rendered docs.
+        run: |
+          TF_VERSION=1.15.7
+          curl -sSfL -o /tmp/tf.zip \
+            "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+          sudo unzip -o /tmp/tf.zip -d /usr/local/bin
+          terraform version
+      - name: Regenerate docs
+        run: make generate
+      - name: Verify docs/ is up to date
+        run: |
+          if [ -n "$(git status --porcelain docs/)" ]; then
+            echo "::error::docs/ is out of date. Run 'make generate' and commit the result."
+            git status --porcelain docs/
+            git --no-pager diff docs/
+            exit 1
+          fi
