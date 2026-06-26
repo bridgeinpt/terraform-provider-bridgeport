@@ -171,6 +171,8 @@ func (p *bridgeportProvider) Resources(_ context.Context) []func() resource.Reso
 		NewServerResource,
 		NewVarResource,
 		NewSecretResource,
+		NewConfigFragmentResource,
+		NewConfigFileResource,
 	}
 }
 
