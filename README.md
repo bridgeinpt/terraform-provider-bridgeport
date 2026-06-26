@@ -84,6 +84,7 @@ Generate a token in BridgePort under **Service Accounts** (recommended for autom
 |---|---|
 | `bridgeport_server` | Manage a server within an environment (natural key `environment` + `name`) |
 | `bridgeport_var` | Manage a non-secret environment variable (natural key `environment` + `key`) |
+| `bridgeport_secret` | Manage a secret (write-only value; natural key `environment` + `key`) |
 
 Full reference: the [`docs/`](docs/) directory (rendered on the [Terraform Registry](https://registry.terraform.io/providers/bridgeinpt/bridgeport/latest/docs)).
 
@@ -92,7 +93,7 @@ Full reference: the [`docs/`](docs/) directory (rendered on the [Terraform Regis
 Resources land in dependency order, tracked in the [platform epic #197](https://github.com/bridgeinpt/bridgeport/issues/197):
 
 1. `bridgeport_server` ✅
-2. `bridgeport_var` ✅ / `bridgeport_secret` (write-only values)
+2. `bridgeport_var` ✅ / `bridgeport_secret` ✅ (write-only values)
 3. `bridgeport_config_file` / `bridgeport_config_fragment` (+ attachments)
 4. `bridgeport_registry_connection` / `bridgeport_container_image`
 5. `bridgeport_service` / `bridgeport_service_deployment`

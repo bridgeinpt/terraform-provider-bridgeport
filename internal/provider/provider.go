@@ -170,6 +170,7 @@ func (p *bridgeportProvider) Resources(_ context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		NewServerResource,
 		NewVarResource,
+		NewSecretResource,
 	}
 }
 
