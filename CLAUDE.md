@@ -8,7 +8,7 @@ This is a **separate repo** from the platform (`bridgeinpt/bridgeport`) because 
 
 ## Modules
 
-`go.mod` + `go.sum` are committed and locked; `go build ./...` works out of the box. The BridgePort Go SDK (`github.com/bridgeinpt/bridgeport/client`) is a **sub-directory module** of the platform repo, pinned to its `client/vX.Y.Z` tag (currently `v0.1.0`). After bumping it or any dependency, run `make bootstrap` (`go mod tidy`) and commit the `go.mod`/`go.sum` diff — CI fails if they're not tidy.
+`go.mod` + `go.sum` are committed and locked; `go build ./...` works out of the box. The BridgePort Go SDK (`github.com/bridgeinpt/bridgeport/client`) is a **sub-directory module** of the platform repo, pinned to its `client/vX.Y.Z` tag (see `go.mod` for the current pin — `client/v0.4.0` as of this writing). After bumping it or any dependency, run `make bootstrap` (`go mod tidy`) and commit the `go.mod`/`go.sum` diff — CI fails if they're not tidy.
 
 ---
 
@@ -49,6 +49,7 @@ These mirror the platform epic and are the reason the provider is safe to adopt:
 
 ## SDK / API coupling
 
+- **Hard rule — fix upstream, never work around in the provider.** If the Go SDK (`client/`) is missing a method, exposes the wrong shape, or returns wrong data — or the BridgePort server/image itself misbehaves (e.g. surfaced by an acceptance test) — **open an issue in the platform repo (`bridgeinpt/bridgeport`)** and wait for the fix to ship (a new `client/vX.Y.Z` tag, or a fixed image). Do **not** hand-roll HTTP against the API, post-process or patch SDK responses, or add provider-side shims to compensate. This is why `bridgeport_version` waited on [#304](https://github.com/bridgeinpt/bridgeport/issues/304) for a typed `GetHealth()` instead of calling `/health` directly. Extends the Architecture tenet *"The SDK does the HTTP."*
 - The provider depends on a **tagged or pseudo-versioned** SDK module. Any provider feature that needs new request/response shapes requires a corresponding SDK change in the platform repo, released as a `client/vX.Y.Z` tag, then bumped here in the same PR.
 - API changes upstream are governed by the [API Stability Policy](https://github.com/bridgeinpt/bridgeport/blob/master/docs/api-stability.md). Breaking wire changes ship only in a platform major; the provider must keep working across the supported range or document a minimum BridgePort version.
 
