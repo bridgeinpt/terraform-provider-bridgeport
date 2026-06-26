@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"os"
+	"time"
 
 	bpclient "github.com/bridgeinpt/bridgeport/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -125,6 +126,12 @@ func (p *bridgeportProvider) Configure(ctx context.Context, req provider.Configu
 	}
 
 	client := bpclient.NewClient(endpoint, token)
+	// Make read calls resilient to transient server errors (the API returns
+	// retryable 503s under brief database contention; older instances surface a
+	// 500). Retries idempotent GET/HEAD only. The client Timeout bounds the whole
+	// call including retries, so widen it to fit the retry budget.
+	client.HTTPClient.Timeout = 60 * time.Second
+	client.HTTPClient.Transport = newRetryTransport(client.HTTPClient.Transport)
 
 	// Fail fast with a clear diagnostic if the credentials are wrong, rather
 	// than surfacing an opaque 401 on the first data-source read.
