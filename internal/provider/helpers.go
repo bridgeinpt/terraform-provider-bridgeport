@@ -43,6 +43,33 @@ func listToStrings(ctx context.Context, l types.List) ([]string, diag.Diagnostic
 	return out, diags
 }
 
+// mapToStringMap converts an optional Terraform map of strings to a Go map. A
+// null/unknown map yields a nil map, so the SDK request omits the field.
+func mapToStringMap(ctx context.Context, m types.Map) (map[string]string, diag.Diagnostics) {
+	if m.IsNull() || m.IsUnknown() {
+		return nil, nil
+	}
+	out := make(map[string]string)
+	diags := m.ElementsAs(ctx, &out, false)
+	return out, diags
+}
+
+// parseJSONMap converts the API's raw JSON-encoded object string (e.g.
+// `{"K":"V"}`) into a Terraform map. When the result is empty and the prior
+// state was null, it preserves null to avoid a spurious null-vs-empty diff.
+func parseJSONMap(ctx context.Context, raw string, prior types.Map) (types.Map, diag.Diagnostics) {
+	var m map[string]string
+	if raw != "" {
+		if err := json.Unmarshal([]byte(raw), &m); err != nil {
+			m = nil
+		}
+	}
+	if len(m) == 0 && prior.IsNull() {
+		return types.MapNull(types.StringType), nil
+	}
+	return types.MapValueFrom(ctx, types.StringType, m)
+}
+
 // parseTags converts the API's raw JSON-encoded tags string (e.g. `["a","b"]`)
 // into a Terraform list. When the result is empty and the prior state was null,
 // it preserves null to avoid a spurious null-vs-empty-list diff.

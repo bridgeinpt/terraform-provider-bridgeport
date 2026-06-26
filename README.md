@@ -18,7 +18,7 @@
 ---
 
 > [!WARNING]
-> **Pre-1.0 and under active development.** Data sources are stable; managed (CRUD) resources are now landing in [dependency order](#roadmap) (starting with `bridgeport_server`). The schema may change before `v1.0.0` — pin a version and read the [CHANGELOG](CHANGELOG.md) before upgrading.
+> **Pre-1.0 and under active development.** Data sources and the full set of managed (CRUD) resources are now available (see [roadmap](#roadmap)). The schema may change before `v1.0.0` — pin a version and read the [CHANGELOG](CHANGELOG.md) before upgrading.
 
 ## Why
 
@@ -89,6 +89,8 @@ Generate a token in BridgePort under **Service Accounts** (recommended for autom
 | `bridgeport_config_file` | Manage a text config file, optionally composed from fragments (natural key `environment` + `name`) |
 | `bridgeport_registry_connection` | Manage a container registry connection (write-only credentials; natural key `environment` + `name`) |
 | `bridgeport_container_image` | Track a container image (natural key `environment` + `image_name`) |
+| `bridgeport_service` | Manage a service template (natural key `environment` + `name`) |
+| `bridgeport_service_deployment` | Place a service onto a server (`service_id` + `server_id`) |
 
 Full reference: the [`docs/`](docs/) directory (rendered on the [Terraform Registry](https://registry.terraform.io/providers/bridgeinpt/bridgeport/latest/docs)).
 
@@ -100,7 +102,7 @@ Resources land in dependency order, tracked in the [platform epic #197](https://
 2. `bridgeport_var` ✅ / `bridgeport_secret` ✅ (write-only values)
 3. `bridgeport_config_file` ✅ / `bridgeport_config_fragment` ✅ (+ attachments)
 4. `bridgeport_registry_connection` ✅ / `bridgeport_container_image` ✅
-5. `bridgeport_service` / `bridgeport_service_deployment`
+5. `bridgeport_service` ✅ / `bridgeport_service_deployment` ✅
 
 `terraform import` will work off the existing natural keys (`environment` + `name`/`key`).
 
