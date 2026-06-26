@@ -57,7 +57,7 @@ JSON
 
 `go.mod` + `go.sum` are committed and locked (BridgePort Go SDK `client/v0.1.0`); `go build`/`go vet`/unit tests pass locally and in CI. CI also enforces `go mod tidy` produces no diff.
 
-Going forward, run `make generate` if you change a schema or example to refresh the committed `docs/` (tfplugindocs is the source of truth; the scaffold's docs are hand-written to match).
+Going forward, run `make generate` if you change a schema or example to refresh the committed `docs/`. tfplugindocs (pinned in `main.go`'s `//go:generate` directive) is the source of truth, and CI fails if the committed `docs/` drift from its output.
 
 ---
 

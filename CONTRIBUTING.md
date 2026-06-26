@@ -82,7 +82,7 @@ Every new data source/resource needs an acceptance test. Use `testAccProtoV6Prov
 
 ## Docs
 
-Registry docs in `docs/` are **generated** by [`tfplugindocs`](https://github.com/hashicorp/terraform-plugin-docs) from the schema `MarkdownDescription`s and the `examples/` directory. Don't hand-edit `docs/` — edit the schema/examples and run `make generate`. The PR template and (optionally) CI verify the generated docs are current.
+Registry docs in `docs/` are **generated** by [`tfplugindocs`](https://github.com/hashicorp/terraform-plugin-docs) from the schema `MarkdownDescription`s and the `examples/` directory. Don't hand-edit `docs/` — edit the schema/examples and run `make generate`. The tfplugindocs version is pinned in `main.go`'s `//go:generate` directive so the output is reproducible, and CI (`.github/workflows/test.yml`) fails if the committed `docs/` don't match `make generate`.
 
 ## Design tenets
 

@@ -18,8 +18,11 @@ import (
 var version = "dev"
 
 // Regenerate the registry docs under docs/ from the schema + examples/.
+// The tfplugindocs version is pinned so `make generate` is reproducible and CI
+// can verify docs/ is up to date (see .github/workflows/test.yml). Bump the
+// version here and re-run `make generate` to adopt a newer tfplugindocs.
 //
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name bridgeport
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.25.0 generate --provider-name bridgeport
 
 func main() {
 	var debug bool
