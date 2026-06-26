@@ -28,12 +28,20 @@ release line (independent of BridgePort platform releases).
   with `base_env`) and `bridgeport_service_deployment` (places a service onto a
   server, with `env_overrides`). Completes the managed-resource set for
   [bridgeinpt/bridgeport#197](https://github.com/bridgeinpt/bridgeport/issues/197).
+- Data source `bridgeport_version` — reports the targeted instance's status and
+  version (`version`, `bundled_agent_version`, `cli_version`) from `GET /health`,
+  for provider ↔ instance version negotiation. Completes the data-source set
+  from [bridgeinpt/terraform-provider-bridgeport#6](https://github.com/bridgeinpt/terraform-provider-bridgeport/issues/6);
+  gated on the SDK gaining a typed health getter
+  ([bridgeinpt/bridgeport#304](https://github.com/bridgeinpt/bridgeport/issues/304)).
 
 ### Changed
 
-- Bump the BridgePort Go SDK to `client/v0.3.0`, which adds the resource write
-  methods plus complete read-back (detail getters, full registry fields), letting
-  the resources read by ID/natural key without list-based workarounds.
+- Bump the BridgePort Go SDK to `client/v0.4.0`, which adds the resource write
+  methods plus complete read-back (detail getters, full registry fields) — letting
+  the resources read by ID/natural key without list-based workarounds — and a
+  typed health/version getter (`GetHealth`), which backs the `bridgeport_version`
+  data source ([bridgeinpt/bridgeport#304](https://github.com/bridgeinpt/bridgeport/issues/304)).
 - Acceptance CI now uses Terraform 1.15.7 (write-only arguments need 1.11+).
 
 ## [0.1.0] - 2026-06-25

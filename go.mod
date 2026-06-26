@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
 )
 
-require github.com/bridgeinpt/bridgeport/client v0.3.0
+require github.com/bridgeinpt/bridgeport/client v0.4.0
 
 require (
 	github.com/ProtonMail/go-crypto v1.4.1 // indirect

@@ -188,5 +188,6 @@ func (p *bridgeportProvider) DataSources(_ context.Context) []func() datasource.
 		NewServersDataSource,
 		NewServiceDataSource,
 		NewServicesDataSource,
+		NewVersionDataSource,
 	}
 }
