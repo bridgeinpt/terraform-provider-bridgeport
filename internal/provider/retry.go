@@ -30,7 +30,7 @@ func newRetryTransport(base http.RoundTripper) *retryTransport {
 	if base == nil {
 		base = http.DefaultTransport
 	}
-	return &retryTransport{base: base, maxRetries: 6, maxWait: 8 * time.Second}
+	return &retryTransport{base: base, maxRetries: 8, maxWait: 8 * time.Second}
 }
 
 func (t *retryTransport) RoundTrip(req *http.Request) (*http.Response, error) {

@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"os"
+	"sync"
 	"time"
 
 	bpclient "github.com/bridgeinpt/bridgeport/client"
@@ -19,6 +20,10 @@ import (
 
 // Ensure bridgeportProvider satisfies the provider.Provider interface.
 var _ provider.Provider = &bridgeportProvider{}
+
+// validatedTokens records (endpoint, token) pairs whose token this process has
+// already validated, so Configure doesn't re-probe GET /api/auth/me every time.
+var validatedTokens sync.Map
 
 // bridgeportProvider is the provider implementation.
 type bridgeportProvider struct {
@@ -130,18 +135,27 @@ func (p *bridgeportProvider) Configure(ctx context.Context, req provider.Configu
 	// retryable 503s under brief database contention; older instances surface a
 	// 500). Retries idempotent GET/HEAD only. The client Timeout bounds the whole
 	// call including retries, so widen it to fit the retry budget.
-	client.HTTPClient.Timeout = 60 * time.Second
+	client.HTTPClient.Timeout = 90 * time.Second
 	client.HTTPClient.Transport = newRetryTransport(client.HTTPClient.Transport)
 
 	// Fail fast with a clear diagnostic if the credentials are wrong, rather
-	// than surfacing an opaque 401 on the first data-source read.
-	if _, err := client.GetCurrentUser(); err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to authenticate with BridgePort",
-			"The provider could not validate the configured token against "+endpoint+". "+
-				"Verify the endpoint is reachable and the token is valid.\n\nError: "+err.Error(),
-		)
-		return
+	// than surfacing an opaque 401 on the first data-source read. This probe is
+	// done once per (endpoint, token) per process: the server authenticates
+	// every real request anyway, and the probe itself triggers a server-side
+	// write (lastActiveAt) — re-running it on every Configure needlessly loads
+	// the instance during acceptance (Terraform calls Configure once per run in
+	// normal use, so this is a no-op there).
+	validationKey := endpoint + "\x00" + token
+	if _, done := validatedTokens.Load(validationKey); !done {
+		if _, err := client.GetCurrentUser(); err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to authenticate with BridgePort",
+				"The provider could not validate the configured token against "+endpoint+". "+
+					"Verify the endpoint is reachable and the token is valid.\n\nError: "+err.Error(),
+			)
+			return
+		}
+		validatedTokens.Store(validationKey, struct{}{})
 	}
 
 	// The client is shared with every data source and resource.
