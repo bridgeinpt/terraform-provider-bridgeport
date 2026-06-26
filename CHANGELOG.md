@@ -37,9 +37,11 @@ release line (independent of BridgePort platform releases).
 
 ### Changed
 
-- Bump the BridgePort Go SDK to `client/v0.3.0`, which adds the resource write
-  methods plus complete read-back (detail getters, full registry fields), letting
-  the resources read by ID/natural key without list-based workarounds.
+- Bump the BridgePort Go SDK to `client/v0.4.0`, which adds the resource write
+  methods plus complete read-back (detail getters, full registry fields) — letting
+  the resources read by ID/natural key without list-based workarounds — and a
+  typed health/version getter (`GetHealth`), which backs the `bridgeport_version`
+  data source ([bridgeinpt/bridgeport#304](https://github.com/bridgeinpt/bridgeport/issues/304)).
 - Acceptance CI now uses Terraform 1.15.7 (write-only arguments need 1.11+).
 
 ## [0.1.0] - 2026-06-25
